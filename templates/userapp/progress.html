@@ -1,0 +1,38 @@
+{% extends 'userapp/base.html' %}
+{% load static %}
+{% block body %}
+<div class="container-fluid">
+
+    <div class="row">
+        
+       
+            <table style="margin-top:100px" width="100%">
+                <tbody><tr>
+                  <th>&nbsp;</th>
+                  <th style="background-color:#009551; color:#ffffff;"><center>Event Progress</center></th>
+                  <th>&nbsp;</th>
+                </tr>
+                <tr>
+                  <td width="5%">&nbsp;</td>
+                  <td style="background-color:#00a65a;  padding:40px;" width="90%" align="center"><h3  style="color:#ffffff;">20.4455 %</h3></td>
+                  <td width="5%">&nbsp;</td>
+                </tr>
+              </tbody></table>
+
+            <table style="margin-top:100px" width="100%">
+                <tbody><tr>
+                  <th>&nbsp;</th>
+                  <th style="background-color:#DA8C10; color:#ffffff;"><center>Calories Burned</center></th>
+                  <th>&nbsp;</th>
+                </tr>
+                <tr>
+                  <td width="5%">&nbsp;</td>
+                  <td style="background-color:#F29C10; padding:40px;" width="90%" align="center"><h3 style="color:#ffffff;">{{kcal}} kCal</h3></td>
+                  <td width="5%">&nbsp;</td>
+                </tr>
+              </tbody></table>
+            
+        
+    </div>
+</div>
+{% endblock body %}

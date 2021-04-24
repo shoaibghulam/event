@@ -1,0 +1,1542 @@
+from django.shortcuts import render , HttpResponse , redirect
+from django.views import View
+from passlib.hash import django_pbkdf2_sha256 as handler
+from django.contrib import messages
+from rest_framework.views import APIView
+from rest_framework.response import Response
+from django.db.models import Q
+from django.core.exceptions import ValidationError
+from django.core.validators import validate_email
+import datetime 
+import requests
+from passlib.hash import django_pbkdf2_sha256 as handler
+from webapp.models import *
+import stripe
+
+# stripe testing key
+stripe.api_key='sk_test_SD1VLYLcME6RYimXA3xxNKXW00eXfNnzuC'
+
+
+class index(View):
+    def get(self,request):
+        
+
+       
+        webdata = setting.objects.all()[0]
+        request.session['title']=webdata.website_title
+        request.session['desc']=webdata.website_description
+        request.session['logo']=str(webdata.website_logo.url)
+        data={
+             'slider':slider.objects.all().order_by('-pk'),
+              'data':Event.objects.all().order_by('-EventId')[0:3]
+        }
+        return render(request,'public/index.html',data)
+
+
+class superadminlogin(APIView):
+    def get(self,request):
+
+        if  request.session.has_key('adminid'):
+            return redirect("/superadmin")
+
+        
+        else:
+
+            try:
+        
+                return render(request ,'superadmin/login.html')
+
+            except:
+
+                return redirect("/superadminlogin")
+
+
+
+    
+    def post(self,request):
+
+        try:
+        
+            SEmail = request.POST['SEmail']
+            SPassword = request.POST['SPassword']
+            fetchobj = Super_AdminAccount.objects.filter(SEmail = SEmail )
+            if fetchobj and handler.verify(SPassword,fetchobj[0].SPassword):
+                request.session['adminid'] =  fetchobj[0].SId
+                request.session['adminname'] =  fetchobj[0].SFname + fetchobj[0].SLname 
+                request.session['adminimg'] =  fetchobj[0].SProfile.url
+                print(request.session['adminid'])
+                messages.success(request,"Login Successfully")
+                return redirect("/superadmin")
+
+
+            else:
+                messages.error(request,"Invalid Credientials")
+                return redirect("/superadminlogin")
+
+        except:
+            return redirect("/superadminlogin")
+
+class superadmin(View):
+    def get(self,request):
+
+        if not request.session.has_key('adminid'):
+            return redirect("/superadminlogin")
+
+        try:
+            user = User_Signup.objects.all().count()
+            userregister = User_Event_Registration.objects.all().count()
+            event = Event.objects.all().count()
+            latestuser = User_Event_Registration.objects.all().order_by('-Registration_id')[0:1]
+            eventlist = Event.objects.all().order_by('-EventId')[0:4]
+            return render(request ,'superadmin/index.html',{'user':user,'userregister':userregister,'event':event,'latestuser':latestuser,'eventlist':eventlist})
+
+        except:
+            return redirect("/superadmin")
+
+
+class superadminlogout(APIView):
+
+    def get(self,request):
+
+        try:
+            del request.session['adminid']
+            del request.session['adminname']
+            del request.session['adminimg']
+            return redirect('/superadminlogin')
+
+        except:
+            return redirect('/superadminlogin')
+
+
+class superadminuser(View):
+    def get(self,request):
+
+        if not request.session.has_key('adminid'):
+            return redirect("/superadminlogin")
+
+        try:
+
+            data = User_Signup.objects.all()
+            countuser = User_Signup.objects.all().count()
+        
+            return render(request ,'superadmin/user.html',{'data':data,'countuser':countuser})
+
+        except:
+            return redirect("/superadmin")
+
+
+class superadminevent(View):
+    def get(self,request):
+
+
+        if not request.session.has_key('adminid'):
+            return redirect("/superadminlogin")
+
+
+        try:
+
+            data = Event.objects.all()
+        
+            return render(request ,'superadmin/event.html',{'data':data})
+
+        except:
+
+            return redirect("/superadmin")
+
+        
+class superadminaddevent(View):
+    def get(self,request):
+
+        if not request.session.has_key('adminid'):
+            return redirect("/superadminlogin")
+
+
+        try:
+
+            data = Event_Type.objects.all()
+        
+            return render(request ,'superadmin/addevent.html',{'data':data})
+
+        except:
+
+            return redirect("/superadminevent")
+
+
+    def post(self,request):
+
+        try:
+
+            EventName = request.POST['EventName']
+            Cost = request.POST['Cost']
+            Registration_start = request.POST['Registration_start']
+            Registration_end = request.POST['Registration_end']
+            Event_logo = request.FILES['Event_logo']
+            Status = request.POST['Status']
+            Description = request.POST['Description']
+            EventTypeId = request.POST['EventTypeId']
+            
+            Super_AdminAccount_id = request.session['adminid']
+
+
+            data = Event(EventName=EventName,Cost=Cost,Registration_start=Registration_start,Registration_end=Registration_end,Event_logo=Event_logo,Status=Status,Description=Description,EventTypeId = Event_Type.objects.get(EventTypeId=EventTypeId))
+
+            data.save()
+
+            messages.success(request,"Add Successfully")
+            return redirect("/superadminaddevent")
+
+        except:
+            return redirect("/superadminaddevent")
+
+
+class admindeleteevents(APIView):
+
+    def get(self,request):
+
+        try:
+
+            id = request.GET['id']
+            data=Event.objects.filter(EventId=id)
+            data.delete()
+            messages.error(request,"Deleted Sucessfully")
+            return HttpResponse("Delete")
+
+        except:
+            return redirect('/superadminevent')
+
+
+
+
+
+
+class superadmineventtype(View):
+
+    def get(self,request):
+
+        if not request.session.has_key('adminid'):
+            return redirect("/superadminlogin")
+
+        try:
+
+            data = Event_Type.objects.all()
+        
+            return render(request ,'superadmin/eventtype.html',{'data':data})
+
+        except:
+            return redirect('/superadmin')
+
+
+class superadminaddeventtype(APIView):
+    def get(self,request):
+
+        if not request.session.has_key('adminid'):
+            return redirect("/superadminlogin")
+
+
+        else:
+     
+            return render(request ,'superadmin/addeventtype.html')
+
+    def post(self,request):
+
+        # try:
+
+        EventType = request.POST['EventType']
+        
+        Super_AdminAccount_id = request.session['adminid']
+
+        checkevent = Event_Type.objects.filter(EventType = EventType )
+
+        if checkevent:
+
+            messages.error(request,"Event Already Exist")
+            return redirect("/superadminaddeventtype")
+
+        data = Event_Type(EventType=EventType,Super_AdminAccount_id=Super_AdminAccount.objects.get(SId = Super_AdminAccount_id))
+        data.save()
+
+        messages.success(request,"Add Successfully")
+        return redirect("/superadminaddeventtype")
+
+        # except:
+        #     return redirect("/superadminaddeventtype")
+
+    
+
+
+class editeventtype(APIView):
+
+    def post(self,request):
+
+        EventTypeId = request.POST['EventTypeId']
+        EventType = request.POST['EventType']
+
+        data = Event_Type.objects.get(EventTypeId = EventTypeId)
+
+        data.EventType = EventType
+        data.save()
+
+        messages.success(request,"Edit Successfully")
+        return redirect("/superadmineventtype")
+
+        
+
+
+
+
+class admindeleteevent(APIView):
+
+    def get(self,request):
+
+        try:
+
+            id = request.GET['id']
+            data=Event_Type.objects.filter(EventTypeId=id)
+            data.delete()
+            messages.error(request,"Deleted Sucessfully")
+            return HttpResponse("Delete")
+
+        except:
+            return redirect('/superadminaddeventtype')
+
+
+
+class superadminregister(View):
+    def get(self,request):
+
+        if not request.session.has_key('adminid'):
+            return redirect("/superadminlogin")
+
+        try:
+
+            data = User_Event_Registration.objects.all()
+        
+            return render(request ,'superadmin/register.html',{'data':data})
+
+        except:
+            return redirect("/superadmin")
+
+class superadmintransition(View):
+    def get(self,request):
+
+        if not request.session.has_key('adminid'):
+            return redirect("/superadminlogin")
+
+        try:
+            
+            data = Transactions.objects.all()
+            return render(request ,'superadmin/transition.html',{'data':data})
+
+        except:
+            return redirect("/superadmin")
+
+
+class eventview(View):
+    def get(self,request,id):
+
+        
+        
+            
+
+        data = Event.objects.get(EventId = id)
+        return render(request,'public/eventview.html',{'d':data})
+
+
+    def post(self,request,id):
+
+        if not request.session.has_key('user_id'):
+            messages.error(request,"Please Create Account")
+            return redirect(f'/eventview/{id}')
+
+        try:
+            price = request.POST['price']
+            price = float(price)
+           
+            exp = request.POST['expiry']
+            exp=exp.split('/')
+            month=exp[0]
+            year=exp[1]
+        
+            cvc=request.POST['cvv']
+            card=request.POST['number']
+            createtoken = stripe.Token.create(
+                        card={
+                        "number": card,
+                        "exp_month": int(month),
+                        "exp_year":int(year) ,
+                        "cvc": cvc,
+                        },
+                        )
+            # price=2.253
+            # price *=100
+            # print("the price is ",price)
+            charge = stripe.Charge.create(
+                        amount = round(price),
+                        currency='usd',
+                        description='Apointment created',
+                        source = createtoken
+                        )
+            print("the charge is ",charge)
+            if(charge['paid']==True):
+                eventid=Event.objects.get(pk=id)
+                userid=User_Signup.objects.get(pk=request.session['user_id'])
+                reg_event=User_Event_Registration(user_id=userid,EventId=eventid)
+                reg_event.save()
+                order_data=Transactions(user_id= userid,event_id=eventid,order_id=charge['id'],totalAmount=price)
+                order_data.save()
+                messages.success(request,'Event has been register successfully')
+                return redirect('/myevent')
+
+        except stripe.error.CardError as e:
+            messages.error(request,e.error.message)
+            return redirect(f'/eventview/{id}')
+            
+   
+
+class events(APIView):
+    def get(self,request):
+
+        eventlist = Event.objects.all().order_by('-EventId')[0:3]
+        return render(request,'public/events.html',{'data':eventlist})
+
+
+class contact(View):
+    def get(self,request):
+        return render(request,'public/contact.html')
+    
+    def post(self,request):
+        name= request.POST['name']
+        email= request.POST['email']
+        subject= request.POST['subject']
+        comment= request.POST['comment']
+        data=contact_us(contact_name=name,contact_email=email,contact_subject=subject,contact_comment=comment)
+        data.save()
+        messages.success(request,'Message has been sent')
+        return redirect('contact')
+
+
+
+
+class login(APIView):
+    def get(self,request):
+        return render(request,'public/signup.html')
+
+
+        
+
+
+
+
+class Signup(APIView):
+    def get(self,request):
+        return render(request,'public/signup.html')
+
+    def post(self,request):
+
+        Name = request.POST['Name']
+        # Surname = request.POST['Surname']
+        Ci = request.POST['Ci']
+        Ruc = request.POST['Ruc']
+        Gender = request.POST['Gender']
+        Phones = request.POST['Phones']
+        Email = request.POST['Email']
+        Direction = request.POST['Direction']
+        City = request.POST['City']
+        Birth_date = request.POST['Birth_date']
+        Password = request.POST['Password']
+        Password = handler.hash(Password)
+
+        checkuser = User_Signup.objects.filter(Ci = Ci)
+        if checkuser:
+
+            messages.error(request,"CI already exists ")
+            return redirect('/login')
+
+        data = User_Signup(Name = Name, Ci=Ci,Ruc=Ruc,Gender=Gender,Phones=Phones,Email=Email,Direction=Direction,City=City,Birth_date=Birth_date,Password=Password)
+
+        data.save()
+
+        messages.success(request,"Signup Sucessfully")
+        return redirect('/clientlogin')
+
+
+
+        
+
+
+        
+
+        
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# supr admin update event
+class superadmineditevent(APIView):
+    def get(self,request,id):
+
+        if not request.session.has_key('adminid'):
+            return redirect("/superadminlogin")
+
+
+        try:
+
+     
+
+            data = Event.objects.get(EventId = id)
+            event_data = Event_Type.objects.all()
+            
+        
+            return render(request ,'superadmin/editevent.html',{'data':data,'event_data':event_data})
+
+        except:
+            return redirect("/superadmin")
+
+    def post(self,request,id):
+
+        try:
+
+            EventName = request.POST['EventName']
+            Cost = request.POST['Cost']
+            Registration_start = request.POST['Registration_start']
+            Registration_end = request.POST['Registration_end']
+            Event_logo = request.FILES.get('Event_logo',False)
+            Status = request.POST['Status']
+            Description = request.POST['Description']
+            EventTypeId = request.POST['EventTypeId']
+
+            EventTypeId = Event_Type.objects.get(EventTypeId=EventTypeId)
+
+            data = Event.objects.get(EventId = id)
+
+            data.EventName = EventName
+            data.Cost = Cost
+            data.Registration_start = Registration_start
+            data.Registration_end = Registration_end
+            
+            data.Status = Status
+            data.Description = Description
+            data.EventTypeId = EventTypeId
+
+            if Event_logo:
+                data.Event_logo = Event_logo
+
+
+            data.save()
+
+            messages.success(request,"Edit Successfully")
+            return redirect("/superadminevent")
+
+        except:
+            return redirect("/superadmin")
+
+
+
+
+
+
+
+
+
+        
+class superadmincontact(View):
+    def get(self,request):
+
+        if not request.session.has_key('adminid'):
+            return redirect("/superadminlogin")
+
+
+        try:
+
+            data = contact_us.objects.all()
+        
+            return render(request ,'superadmin/contact.html',{'data':data})
+
+        except:
+
+            return redirect("/superadminevent")
+
+
+
+    
+    
+        
+class superadmindelevent(View):
+    def get(self,request,id):
+
+        if not request.session.has_key('adminid'):
+            return redirect("/superadminlogin")
+
+
+        try:
+
+            data = contact_us.objects.get(pk=id)
+            data.delete()
+            messages.success(request,"Message has been deleted")
+            return redirect("superadmincontact")
+            
+
+        except:
+
+            return redirect("/superadminevent")
+
+
+
+
+class superadminsetting(View):
+    def get(self,request):
+
+        if not request.session.has_key('adminid'):
+            return redirect("/superadminlogin")
+
+
+        try:
+            data = setting.objects.all()[0]
+            data={
+                'data':data,
+                'slider':slider.objects.all().order_by('-pk')
+            }
+            return render(request ,'superadmin/setting.html',data)
+
+        except:
+
+            return redirect("/superadminevent")
+
+
+    def post(self,request):
+
+        if not request.session.has_key('adminid'):
+            return redirect("/superadminlogin")
+
+
+        try:
+            data = setting.objects.all()[0]
+            data.website_title = request.POST['title']
+            data.website_description= request.POST['desc']
+            logo = request.FILES.get('logo')
+            if logo:
+                data.website_logo=logo
+            data.save()
+            
+            messages.success(request,'Website Data has been updated')
+            return redirect('superadminsetting')
+
+        except:
+
+            return redirect("/superadminevent")
+
+
+
+    
+    
+
+
+
+class clientlogin(View):
+    def get(self,request):
+        return render(request,'public/clientlogin.html')
+
+    def post(self, request):
+        try:
+        
+            Surname = request.POST['Surname']
+            Password = request.POST['Password']
+            fetchobj = User_Signup.objects.filter(Ci = Surname )
+            if fetchobj and handler.verify(Password,fetchobj[0].Password):
+                request.session['user_id'] =  fetchobj[0].user_id
+                request.session['Surname'] =  fetchobj[0].Surname 
+                request.session['name'] =  fetchobj[0].Name 
+                
+                messages.success(request,"Login Successfully")
+                return redirect("/myevent")
+
+
+            else:
+                messages.error(request,"Invalid Credientials")
+                return redirect("/clientlogin")
+
+        except:
+            return redirect("/clientlogin")
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class myevent(View):
+    def get(self, request):
+
+        if not request.session.has_key('user_id'):
+            return redirect("/login")
+
+        try:
+
+            data = User_Event_Registration.objects.filter(user_id = request.session['user_id'])
+            return render(request,'userapp/myevents.html',{'data':data})
+
+        except:
+            return redirect('/')
+
+class eventapp(View):
+    def get(self,request,id):
+
+        if not request.session.has_key('user_id'):
+            return redirect("/login")
+
+        try:
+
+            data = Event.objects.get(EventId = id)
+            request.session['eventid'] = id
+            print(request.session['eventid'])
+            return render(request,'userapp/index.html',{'data':data}) 
+
+        except:
+
+            return redirect('/eventapp')
+
+
+class uploadprogress(View):
+    def get(self,request):
+
+        if not request.session.has_key('user_id'):
+            return redirect("/login")
+
+        return render(request,'userapp/uploadprogress.html') 
+
+    def post(self,request):
+
+        try:
+
+            EventId = request.session['eventid']
+
+            
+            user_id = request.session['user_id']
+            date = request.POST['date']
+            time = request.POST['time']
+            weight = request.POST['weight']
+            running_point = request.POST['running_point']
+            weather = request.POST['weather']
+
+            
+
+            eventobj = Event.objects.get(EventId = EventId) 
+            user_obj = User_Signup.objects.get(user_id = user_id) 
+
+            data = event_progress(EventId = eventobj,user_id= user_obj,date=date,time=time,weight=weight,running_point=running_point,meter=weather)
+
+            data.save()
+
+            messages.success(request,"Progress Upload Successfully")
+            return redirect('/uploadprogress')
+
+        except:
+
+            return redirect('/eventapp')
+
+
+
+
+class Progress(APIView):
+
+    def get(self,request):
+
+        if not request.session.has_key('user_id'):
+            return redirect("/login")
+
+
+        data = event_progress.objects.filter(user_id = request.session['user_id'],EventId=request.session['eventid']).order_by('-pk')[0]
+        userdata=User_Signup.objects.get(pk=request.session['user_id'])
+        year = datetime.date.today().year
+        age= year- userdata.Birth_date.year
+        #calories burned = distance run (kilometres) x weight of runner (kilograms) x 1.036
+        kcal=(data.meter/1000) * data.weight *1.036
+        print("mune year",kcal)
+
+
+
+        data={
+            'kcal':kcal
+        }
+        # return HttpResponse("weatherlist")
+
+        return render(request,"userapp/progress.html",data)
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+class adminslider(View):
+    def post(self, request):
+        if not request.session.has_key('adminid'):
+            return redirect("/superadminlogin")
+    
+
+        # try:
+        fword= request.POST['fword']
+        sword= request.POST['sword']
+        desc= request.POST['desc']
+        thumb= request.FILES['thumb']
+        data= slider(slider_first_word=fword,slider_second_word=sword,slider_description=desc,slider_thumb=thumb)
+        data.save()
+        messages.success(request,'Slider has been save Successfully')
+        return redirect('superadminsetting')
+
+        # except:
+
+        #     return redirect("/superadminevent")
+
+
+
+
+
+
+class clientlogout(APIView):
+
+    def get(self,request):
+
+        try:
+            del request.session['user_id']
+            del request.session['Surname']
+          
+            return redirect('/')
+
+        except:
+            return redirect('/')
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

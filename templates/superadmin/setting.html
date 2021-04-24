@@ -1,0 +1,161 @@
+{% extends "superadmin/base.html" %}
+{% block body %}
+<div class="container-fluid">
+    <div class="page-titles">
+        <ol class="breadcrumb">
+            <li class="breadcrumb-item active"><a href="javascript:void(0)">User</a></li>
+            <li class="breadcrumb-item"><a href="javascript:void(0)">User List</a></li>
+        </ol>
+    </div>
+  
+    {% for message in messages %}
+    <div class="alert alert-{{message.tags}} mb-0 alert-dismissible  show" role="alert">
+        <strong>Message:</strong> {{message}}
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+{% endfor %}
+    <div class="row">
+        <div class="col-lg-12">
+          
+        <div class="row">
+            <div class="col-md-8 mx-auto">
+                <h1>Website Setting</h1>
+            <form action="{% url 'superadminsetting' %}" method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+                <div class="form-group">
+                    <label >Website Title</label>
+                    <input type="text" name="title" class="form-control" placeholder="Enter Website title" value="{{data.website_title}}" required>
+                </div>
+                
+                
+                <div class="form-group">
+                    <label >Website Description</label>
+                    <textarea type="text" name="desc" class="form-control" placeholder="Enter Website title" required>{{data.website_description}}</textarea>
+                </div>
+                <div class="form-group">
+                    <div class="row">
+                        <div class="col-md-8 mt-4">
+                            <label >Website Logo</label>
+                            <input type="file" name="logo" class="form-control" placeholder="Enter Website title"  >
+                          <div class="text-center mt-4">
+
+                              <input type="submit" class="btn btn-primary" value="Update" >
+                          </div>
+                        </div>
+                        <div class="col-md-4">
+                            <img class="img-fluid" src={{data.website_logo.url}}/>
+                        </div>
+                    </div>
+                  
+                    
+                </div>
+            </form>
+            </div>
+           
+        </div>
+        </div>
+    </div>
+    <!-- slider start -->
+    <div class="row" >
+        <div class="col-md-12 text-center" style="margin:100px 0;">
+            <h1>Slider</h1>
+            <button class="btn btn-outline-primary float-right" data-toggle="modal" data-target=".bd-example-modal-lg">Add Slide</button>
+        </div>
+       
+            <!-- slider card start -->
+            
+
+
+
+            {% for slider in slider  %}
+              
+            
+        <div class="col-xl-4">
+            <div class="card mb-3">
+            <img class="card-img-top img-fluid" src="{{slider.slider_thumb.url}}" alt="Card image cap">
+            <div class="card-header">
+            <h5 class="card-title">{{slider.slider_first_word}} {{slider.slider_second_word}}</h5>
+            </div>
+            <div class="card-body">
+            <p class="card-text">{{slider.slider_description}}</p>
+            <p class="card-text text-dark">
+                <button class="btn btn-primary">Update</button>
+                <button class="btn btn-danger">Delete</button>
+            </p>
+            </div>
+            </div>
+            </div>
+            {% endfor %}
+            <!-- slider card end -->
+    </div>
+    <!-- slider insert Modal start -->
+    <div class="modal fade bd-example-modal-lg" tabindex="-1" role="dialog" aria-hidden="true">
+        <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+        <div class="modal-header">
+        <h5 class="modal-title">Modal title</h5>
+        <button type="button" class="close" data-dismiss="modal"><span>&times;</span>
+        </button>
+        </div>
+        <div class="modal-body">
+            <form action="{% url 'adminslider' %}" method="POST" enctype="multipart/form-data">
+                {% csrf_token %}
+            <div class="form-group">
+                <div class="row">
+                    <div class="col-md-6">
+                        <label >Slider First Word</label>
+                        <input type="text" name="fword" class="form-control" placeholder="Enter Website title"  required>
+    
+                    </div>
+                    <div class="col-md-6">
+                        <label >Slider Second Word</label>
+                        <input type="text" name="sword" class="form-control" placeholder="Enter Website title"  required>
+    
+                    </div>
+              
+                </div>
+            </div>
+            
+            
+            <div class="form-group">
+                <label >slider Description</label>
+                <textarea type="text" name="desc" class="form-control" placeholder="Enter Website title" required></textarea>
+            </div>
+            <div class="form-group">
+                <div class="row">
+                    <div class="col-md-12 mt-4">
+                        <label >Slider Wallpaper</label>
+                        <input type="file" name="thumb" class="form-control" placeholder="Enter Website title"  >
+                      
+                    </div>
+                   
+                </div>
+              
+                
+            </div>
+     
+        </div>
+        <div class="modal-footer">
+        <button type="button" class="btn btn-danger light" data-dismiss="modal">Close</button>
+        <button type="submit" class="btn btn-primary">Save changes</button>
+    </form>
+        </div>
+        </div>
+        </div>
+        </div>
+    <!-- slider insert Modal end-->
+    <!-- slider end -->
+    
+</div>
+
+
+{% endblock body %}
+
+{% block script %}
+<script>
+
+
+</script>
+{% endblock script %}

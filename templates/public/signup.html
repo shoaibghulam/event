@@ -1,0 +1,99 @@
+{% extends "public/layout/base.html" %}
+{% load static %}
+{% block body %}
+
+
+<div class="single-class ">
+  <div class="row">
+ 
+    <!-- Registration -->
+    <div class="col-md-6 p-0 mx-auto m-0">
+
+      <div class="product-area shopping-area pad90">
+        <div class="container">
+          <div class="row">
+            <div class="col-md-12">
+              <div class="section-title text-center">
+                <div class="title-bar full-width mb20">
+                  <img src="{% static ''%}landing/assets/images/logo/ttl-bar.png" alt="title-img">
+
+                </div>
+                <h3>Sign Up</h3>
+
+              </div>
+            </div>
+
+          </div>
+
+          <div class="row">
+            <div class="col-md-10 mx-auto text-dark">
+              <form action="/Signup" class="sign-up-form" method="POST">
+                {% csrf_token %}
+                <h2 class="title">Sign up</h2>
+
+                <div class="form-group">
+                  <label> Name</label>
+                  <input type="text" class="form-control" placeholder="Name" name="Name" required />
+                </div>
+                
+                <div class="form-group">
+                  <label> Ci </label>
+                  <input type="number" class="form-control" placeholder="Ci" name="Ci" required />
+                </div>
+                <div class="form-group">
+                  <label>Ruc </label>
+                  <input type="text" class="form-control" placeholder="Ruc" name="Ruc" required />
+                </div>
+                <div class="form-group">
+                  <label>Gender </label>
+                  <select class="form-control" placeholder="Gender" name="Gender" required>
+                    <option value="">Select Gender</option>
+                    <option value="Male">Male</option>
+                    <option value="Female">Female</option>
+                  </select>
+                </div>
+                <div class="form-group">
+                  <label for="">Email</label>
+                  <input type="email" class="form-control" placeholder="Email" name="Email" required />
+                </div>
+                <div class="form-group">
+                  <label for="">Password</label>
+                  <input type="number" min="0" max="999" class="form-control" placeholder="Password" name="Password" required />
+                </div>
+                <div class="form-group">
+                  <label> Mobile No</label>
+                  <input type="text" class="form-control" placeholder="Mobile Number" name="Phones" required />
+                </div>
+                <div class="form-group">
+                  <label>Direction</label>
+                  <input type="text" class="form-control" placeholder="Direction" name="Direction" required />
+                </div>
+                <div class="form-group">
+                  <label> City </label>
+                  <input type="text" class="form-control" placeholder="City" name="City" required />
+                </div>
+                <div class="form-group">
+                  <label> Date of Birth </label>
+                  <input type="Date" class="form-control" placeholder="Birth_date" name="Birth_date" required />
+                </div>
+
+                <input type="submit" class="btn btn-primary" value="Sign up" />
+
+              </form>
+            </div>
+
+
+
+          </div>
+
+        </div>
+
+      </div>
+    </div>
+
+
+  </div>
+
+
+</div>
+{% endblock body %}
