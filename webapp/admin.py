@@ -10,6 +10,7 @@ admin.site.register(User_Event_Registration)
 admin.site.register(Transactions)
 admin.site.register(event_progress)
 admin.site.register(setting)
+admin.site.register(slider)
 
 
 

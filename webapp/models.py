@@ -1,5 +1,5 @@
 from django.db import models
-
+from rest_framework import serializers
 # Create your models here.
 
 class Super_AdminAccount(models.Model):
@@ -36,6 +36,7 @@ class Event(models.Model):
     Status = models.CharField(max_length=50, default="")
     EventTypeId = models.ForeignKey(Event_Type , on_delete=models.SET_NULL,blank=True,null=True)
     Description = models.TextField(default="")
+    created = models.DateTimeField(auto_now_add=True, blank=True)
 
     
     def __str__(self):
@@ -128,14 +129,32 @@ class setting(models.Model):
 
 class slider(models.Model):
     slider_id=models.AutoField(primary_key=True)
-    slider_first_word=models.CharField(max_length=100)
-    slider_second_word=models.CharField(max_length=100)
-    slider_description=models.CharField(max_length=256)
-    slider_thumb = models.ImageField(upload_to='slider/',default="SuperAdmin/dummy.jpg")
+    title=models.CharField(max_length=100)
+    desc=models.CharField(max_length=100)
+    button_name=models.CharField(max_length=256)
+    button_link=models.CharField(max_length=256)
+    background = models.ImageField(upload_to='slider/',default="SuperAdmin/dummy.jpg")
+    front_img = models.ImageField(upload_to='slider/',default="SuperAdmin/dummy.jpg")
+    front_img_two = models.ImageField(upload_to='slider/',default="SuperAdmin/dummy.jpg")
 
     def __str__(self):
-        return self.website_title
+        return self.title
 
 
 
 
+# serilizer 
+
+
+class serUserSignUp(serializers.ModelSerializer):
+  
+    class Meta:
+        model = User_Signup 
+        fields='__all__'
+
+        
+class serProgress(serializers.ModelSerializer):
+    user_id=serUserSignUp()
+    class Meta:
+        model = event_progress 
+        fields='__all__'

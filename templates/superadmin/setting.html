@@ -61,7 +61,7 @@
     <div class="row" >
         <div class="col-md-12 text-center" style="margin:100px 0;">
             <h1>Slider</h1>
-            <button class="btn btn-outline-primary float-right" data-toggle="modal" data-target=".bd-example-modal-lg">Add Slide</button>
+            <button class="btn btn-outline-primary float-right" data-toggle="modal" data-target=".bd-example-modal-lg">Update Slide</button>
         </div>
        
             <!-- slider card start -->
@@ -69,25 +69,29 @@
 
 
 
-            {% for slider in slider  %}
+
+
+
+
+
+          
               
             
-        <div class="col-xl-4">
+        <div class="col-xl-6 mx-auto">
             <div class="card mb-3">
-            <img class="card-img-top img-fluid" src="{{slider.slider_thumb.url}}" alt="Card image cap">
+            <img class="card-img-top mx-auto img-fluid" src="{{slider.background.url}}"  style="height:400px; width:90%" alt="Card image cap">
+            <img class="card-img-top mx-auto mt-4 img-fluid" src="{{slider.front_img.url}}" style="height:200px; width:50%"alt="Card image cap">
             <div class="card-header">
-            <h5 class="card-title">{{slider.slider_first_word}} {{slider.slider_second_word}}</h5>
+            <h5 class="card-title">{{slider.title}}</h5>
             </div>
             <div class="card-body">
-            <p class="card-text">{{slider.slider_description}}</p>
-            <p class="card-text text-dark">
-                <button class="btn btn-primary">Update</button>
-                <button class="btn btn-danger">Delete</button>
-            </p>
+            <p class="card-text">{{slider.desc}}</p>
+            <p class="card-text">Button Name: {{slider.button_name}}<br>Button Link: {{slider.button_link}}</p>
+         
             </div>
             </div>
             </div>
-            {% endfor %}
+         
             <!-- slider card end -->
     </div>
     <!-- slider insert Modal start -->
@@ -105,13 +109,23 @@
             <div class="form-group">
                 <div class="row">
                     <div class="col-md-6">
-                        <label >Slider First Word</label>
-                        <input type="text" name="fword" class="form-control" placeholder="Enter Website title"  required>
+
+
+
+
+                        <label >title</label>
+                        <input type="hidden" name="pk"   value="{{slider.slider_id}}"required>
+                        <input type="text" name="title" class="form-control" placeholder="Enter Website title"  value="{{slider.title}}"required>
     
                     </div>
                     <div class="col-md-6">
-                        <label >Slider Second Word</label>
-                        <input type="text" name="sword" class="form-control" placeholder="Enter Website title"  required>
+                        <label >Button Name</label>
+                        <input type="text" name="btnname" class="form-control" placeholder="Enter Website title"  value="{{slider.button_name}}" required>
+    
+                    </div>
+                    <div class="col-md-12">
+                        <label >Button Link</label>
+                        <input type="text" name="btnlink" class="form-control" placeholder="Enter Website title"  value="{{slider.button_link}}" required>
     
                     </div>
               
@@ -121,12 +135,17 @@
             
             <div class="form-group">
                 <label >slider Description</label>
-                <textarea type="text" name="desc" class="form-control" placeholder="Enter Website title" required></textarea>
+                <textarea type="text" name="desc" class="form-control" placeholder="Enter Website title" required>{{slider.desc}}</textarea>
             </div>
             <div class="form-group">
                 <div class="row">
-                    <div class="col-md-12 mt-4">
-                        <label >Slider Wallpaper</label>
+                    <div class="col-md-6 mt-4">
+                        <label >Slider Background</label>
+                        <input type="file" name="back" class="form-control" placeholder="Enter Website title"  >
+                      
+                    </div>
+                    <div class="col-md-6 mt-4">
+                        <label >Slider Front</label>
                         <input type="file" name="thumb" class="form-control" placeholder="Enter Website title"  >
                       
                     </div>

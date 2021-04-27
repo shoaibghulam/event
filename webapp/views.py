@@ -12,6 +12,7 @@ import requests
 from passlib.hash import django_pbkdf2_sha256 as handler
 from webapp.models import *
 import stripe
+import json
 
 # stripe testing key
 stripe.api_key='sk_test_SD1VLYLcME6RYimXA3xxNKXW00eXfNnzuC'
@@ -27,10 +28,11 @@ class index(View):
         request.session['desc']=webdata.website_description
         request.session['logo']=str(webdata.website_logo.url)
         data={
-             'slider':slider.objects.all().order_by('-pk'),
+             'slider':slider.objects.all()[0],
               'data':Event.objects.all().order_by('-EventId')[0:3]
         }
-        return render(request,'public/index.html',data)
+        return render(request,'landing/index.html',data)
+        # return render(request,'public/index.html',data)
 
 
 class superadminlogin(APIView):
@@ -339,7 +341,7 @@ class eventview(View):
             
 
         data = Event.objects.get(EventId = id)
-        return render(request,'public/eventview.html',{'d':data})
+        return render(request,'landing/eventview.html',{'d':data})
 
 
     def post(self,request,id):
@@ -397,12 +399,12 @@ class events(APIView):
     def get(self,request):
 
         eventlist = Event.objects.all().order_by('-EventId')[0:3]
-        return render(request,'public/events.html',{'data':eventlist})
+        return render(request,'landing/eventos.html',{'data':eventlist})
 
 
 class contact(View):
     def get(self,request):
-        return render(request,'public/contact.html')
+        return render(request,'landing/contact.html')
     
     def post(self,request):
         name= request.POST['name']
@@ -653,7 +655,7 @@ class superadminsetting(View):
             data = setting.objects.all()[0]
             data={
                 'data':data,
-                'slider':slider.objects.all().order_by('-pk')
+                'slider':slider.objects.all().order_by('-pk')[0]
             }
             return render(request ,'superadmin/setting.html',data)
 
@@ -1183,13 +1185,27 @@ class adminslider(View):
     
 
         # try:
-        fword= request.POST['fword']
-        sword= request.POST['sword']
-        desc= request.POST['desc']
-        thumb= request.FILES['thumb']
-        data= slider(slider_first_word=fword,slider_second_word=sword,slider_description=desc,slider_thumb=thumb)
+
+
+
+
+
+    
+        data=slider.objects.get(pk=request.POST['pk'])
+       
+        data.title=request.POST['title']
+        data.desc=request.POST['btnname']
+        data.button_name=request.POST['btnlink']
+        data.button_link=request.POST['desc']
+        back=request.FILES.get('back')
+        if back:
+             data.background=back
+        thumb = request.FILES.get('thumb')
+        if thumb:
+              data.front_img=thumb
+        # data= slider(slider_first_word=fword,slider_second_word=sword,slider_description=desc,slider_thumb=thumb)
         data.save()
-        messages.success(request,'Slider has been save Successfully')
+        messages.success(request,'Slider has been Update Successfully')
         return redirect('superadminsetting')
 
         # except:
@@ -1216,6 +1232,26 @@ class clientlogout(APIView):
 
 
 
+class leaderboard(View):
+    
+    def get(self,request):
+        if not request.session.has_key('adminid'):
+           return redirect("/superadminlogin")
+        return render(request,'userapp/leaderboard.html')
+
+class leaderboarddata(View):
+    def get(self, request):
+        if not request.session.has_key('adminid'):
+           return redirect("/superadminlogin")
+        alldata=list()
+        data= event_progress.objects.all().order_by('-pk')
+        for x in data:
+            if not x.user_id.user_id in alldata:
+                alldata.append(x)
+        print(alldata)
+        
+        serdata= serProgress(alldata, many=True)
+        return HttpResponse(json.dumps(serdata.data))
 
 
 
