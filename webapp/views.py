@@ -336,7 +336,7 @@ class superadmintransition(View):
 class eventview(View):
     def get(self,request,id):
         if not request.session.has_key('user_id'):
-            return redirect("/login")
+            return redirect("/clientlogin")
 
         data = Event.objects.get(EventId = id)
         return render(request,'userapp/viewevent.html',{'d':data})
@@ -396,7 +396,7 @@ class eventview(View):
 class events(APIView):
     def get(self,request):
         if not request.session.has_key('user_id'):
-            return redirect("/login")
+            return redirect("/clientlogin")
         alreadyid=list()
         listed=User_Event_Registration.objects.filter(user_id= request.session['user_id'])
         for x in listed:
@@ -1048,7 +1048,7 @@ class myevent(View):
     def get(self, request):
 
         if not request.session.has_key('user_id'):
-            return redirect("/login")
+            return redirect("/clientlogin")
 
         try:
 
@@ -1062,7 +1062,7 @@ class eventapp(View):
     def get(self,request,id):
 
         if not request.session.has_key('user_id'):
-            return redirect("/login")
+            return redirect("/clientlogin")
 
         try:
 
@@ -1080,7 +1080,7 @@ class uploadprogress(View):
     def get(self,request):
 
         if not request.session.has_key('user_id'):
-            return redirect("/login")
+            return redirect("/clientlogin")
 
         return render(request,'userapp/uploadprogress.html') 
 
@@ -1122,7 +1122,7 @@ class Progress(APIView):
     def get(self,request):
 
         if not request.session.has_key('user_id'):
-            return redirect("/login")
+            return redirect("/clientlogin")
 
 
         data = event_progress.objects.filter(user_id = request.session['user_id'],EventId=request.session['eventid']).order_by('-pk')[0]
@@ -1239,22 +1239,24 @@ class clientlogout(APIView):
 class leaderboard(View):
     
     def get(self,request):
-        if not request.session.has_key('adminid'):
-           return redirect("/superadminlogin")
+        if not request.session.has_key('user_id'):
+            return redirect("/clientlogin")
         return render(request,'userapp/leaderboard.html')
 
 class leaderboarddata(View):
     def get(self, request):
-        if not request.session.has_key('adminid'):
-           return redirect("/superadminlogin")
+        if not request.session.has_key('user_id'):
+            return redirect("/clientlogin")
         alldata=list()
+        # data= event_progress.objects.order_by().values('user_id__Name','meter','weight').distinct()
         data= event_progress.objects.all().order_by('-pk')
-        for x in data:
-            if not x.user_id.user_id in alldata:
-                alldata.append(x)
-        print(alldata)
-        
-        serdata= serProgress(alldata, many=True)
+        # for x in data:
+        #     if not x.user_id.user_id in alldata:
+        #         alldata.append(x)
+        # print(alldata)
+        # print("the data is ",alldata)
+        serdata= serProgress(data, many=True)
+        # x=f"[{data}]"
         return HttpResponse(json.dumps(serdata.data))
 
 
