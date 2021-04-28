@@ -335,13 +335,11 @@ class superadmintransition(View):
 
 class eventview(View):
     def get(self,request,id):
-
-        
-        
-            
+        if not request.session.has_key('user_id'):
+            return redirect("/login")
 
         data = Event.objects.get(EventId = id)
-        return render(request,'landing/eventview.html',{'d':data})
+        return render(request,'userapp/viewevent.html',{'d':data})
 
 
     def post(self,request,id):
@@ -397,9 +395,15 @@ class eventview(View):
 
 class events(APIView):
     def get(self,request):
+        if not request.session.has_key('user_id'):
+            return redirect("/login")
+        alreadyid=list()
+        listed=User_Event_Registration.objects.filter(user_id= request.session['user_id'])
+        for x in listed:
+            alreadyid.append(x.EventId.EventId)
 
-        eventlist = Event.objects.all().order_by('-EventId')[0:3]
-        return render(request,'landing/eventos.html',{'data':eventlist})
+        eventlist = Event.objects.filter(~Q(pk__in=alreadyid)).order_by('-EventId')[0:3]
+        return render(request,'userapp/allevents.html',{'data':eventlist})
 
 
 class contact(View):
@@ -709,7 +713,7 @@ class clientlogin(View):
                 request.session['name'] =  fetchobj[0].Name 
                 
                 messages.success(request,"Login Successfully")
-                return redirect("/myevent")
+                return redirect("/events")
 
 
             else:
