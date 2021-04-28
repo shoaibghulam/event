@@ -429,9 +429,9 @@ class login(APIView):
 
 
 
-class Signup(APIView):
+class signup(APIView):
     def get(self,request):
-        return render(request,'public/signup.html')
+        return render(request,'landing/signup.html')
 
     def post(self,request):
 

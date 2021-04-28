@@ -146,7 +146,7 @@ urlpatterns = [
 
 path('myevent',myevent.as_view(), name="myevent"),
 path('login', login.as_view(),name="login"),
-path('Signup', Signup.as_view(),name="Signup"),
+path('signup', signup.as_view(),name="signup"),
 path('eventapp/<int:id>', eventapp.as_view(),name="eventapp"),
 path('Progress', Progress.as_view(),name="Progress"),
 path('uploadprogress', uploadprogress.as_view(),name="uploadprogress"),
