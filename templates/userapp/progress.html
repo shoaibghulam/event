@@ -48,26 +48,35 @@
 </div>
 {% endblock body %}
 {% block script %}
+
 <script>
 var dataset=[];
 var label=[]
- $(document).ready(function(){
-  $.ajax({
-    url:'userprogress',
-    type:'GET',
-    success: function (data) {
-       var alldata = eval(data);
+ var xmlhttp = new XMLHttpRequest();
+
+    xmlhttp.onreadystatechange = function() {
+        if (xmlhttp.readyState == XMLHttpRequest.DONE) {   // XMLHttpRequest.DONE == 4
+           if (xmlhttp.status == 200) {
+              var alldata = eval(xmlhttp.responseText);
        for(x=0;x<alldata.length;x++){
          var  kcal=(alldata[x].meter/1000) * alldata[x].weight *1.036
          dataset.push(kcal)
          label.push(alldata[x].date)
        }
        progressChart(dataset,label)
-    }
-  })
-   
+            //console.log("set is here,", xmlhttp.responseText[0])
+           }
+           else if (xmlhttp.status == 400) {
+              alert('There was an error 400');
+           }
+           else {
+               alert('something else other than 200 was returned');
+           }
+        }
+    };
 
- })
+    xmlhttp.open("GET", "/userprogress", true);
+    xmlhttp.send();
  const progressChart=(data,label)=>{
    
    var ctx = document.getElementById("mychart");

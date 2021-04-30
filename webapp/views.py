@@ -1056,6 +1056,8 @@ class myevent(View):
             return redirect("/clientlogin")
 
         try:
+            if request.session.has_key('eventid'):
+                del request.session['eventid']
 
             data = User_Event_Registration.objects.filter(user_id = request.session['user_id'])
             return render(request,'userapp/myevents.html',{'data':data})
@@ -1254,7 +1256,7 @@ class leaderboarddata(View):
             return redirect("/clientlogin")
         alldata=list()
         # data= event_progress.objects.order_by().values('user_id__Name','meter','weight').distinct()
-        data= event_progress.objects.all().order_by('-pk')
+        data= event_progress.objects.filter(EventId=request.session['eventid']).order_by('-pk')
         # for x in data:
         #     if not x.user_id.user_id in alldata:
         #         alldata.append(x)
