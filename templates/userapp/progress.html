@@ -4,8 +4,18 @@
 <div class="container-fluid">
 
     <div class="row">
-        
-       
+         <div class="col-sm-12 col-md-12">
+                <div class="card small bar-chart">
+                  <div class="card-header">
+                    <div class="card-title">Bar charts</div>
+                  </div>
+                  <div class="card-content">
+                    <canvas id="mychart" style="height:400px;"></canvas>
+                
+                  </div>
+                </div>
+              </div>
+{% comment %}        
             <table style="margin-top:20px" width="100%">
                 <tbody><tr>
                   <th>&nbsp;</th>
@@ -33,6 +43,68 @@
               </tbody></table>
             
         
-    </div>
+    {% endcomment %}
+    </div> 
 </div>
 {% endblock body %}
+{% block script %}
+<script>
+var dataset=[];
+var label=[]
+ $(document).ready(function(){
+  $.ajax({
+    url:'userprogress',
+    type:'GET',
+    success: function (data) {
+       var alldata = eval(data);
+       for(x=0;x<alldata.length;x++){
+         var  kcal=(alldata[x].meter/1000) * alldata[x].weight *1.036
+         dataset.push(kcal)
+         label.push(alldata[x].date)
+       }
+       progressChart(dataset,label)
+    }
+  })
+   
+
+ })
+ const progressChart=(data,label)=>{
+   
+   var ctx = document.getElementById("mychart");
+                var myChart = new Chart(ctx, {
+                    type: 'bar',
+                    data: {
+                        labels:label,
+                        datasets: [
+                          
+                            {
+                                label: "Calories Burned",
+                                borderColor: "#009688",
+                                borderWidth: "1",
+                                backgroundColor: "#F29C10",
+                                pointHighlightStroke: "#009688",
+                                data: dataset,
+                            }
+                        ]
+                    },
+                    options: {
+        responsive: true,
+        maintainAspectRatio: false,
+        tooltips: {
+            mode: 'point',
+            intersect: false,
+        },
+          scales: {
+              yAxes: [{
+                  ticks: {
+                      beginAtZero: true
+                  }
+                  
+              }]
+          }
+      }
+                });
+                
+ }
+</script>
+{% endblock script %}

@@ -162,6 +162,7 @@ path('logout', clientlogout.as_view(),name="clientlogout"),
 path('clientlogin', clientlogin.as_view(),name="clientlogin"),
 path('leaderboard', leaderboard.as_view(),name="leaderboard"),
 path('leaderboarddata', leaderboarddata.as_view(),name="leaderboarddata"),
+path('userprogress', userprogress.as_view(),name="userprogress"),
 
 
 

@@ -43,12 +43,14 @@
                         
           {% comment %} <li icon="md md-blur-on"> <a href="/eventapp/{{request.session.eventid}}"><i class="md md-blur-on"></i>&nbsp;<span>Home</span></a></li> {% endcomment %}
           <li icon="md md-blur-on"> <a href="/events"><i class="md md-blur-on"></i>&nbsp;<span>Events</span></a></li>
+          {% if request.session.event_status %}
+          {% if request.session.eventid %}
           <li icon="md md-assessment"> <a href="/Progress"><i class="md  md-assessment"></i>&nbsp;<span>Progress</span></a></li>
           <li icon="md md-assessment"> <a href="/leaderboard"><i class="md  md-assessment"></i>&nbsp;<span>LeaderBoard</span></a></li>
-          <li icon="md md-cloud-upload"> <a href="/uploadprogress"><i class="md md-cloud-upload"></i>&nbsp;<span>Upload Progress</span></a></li>
+          <li icon="md md-cloud-upload"> <a href="/uploadprogress"><i class="md md-cloud-upload"></i>&nbsp;<span>Upload Progress</span></a></li>{% endif %}
           <li icon="md  md-event-available"> <a href="/myevent"><i class="md md-event-available"></i>&nbsp;<span>My Events</span></a></li>
+          {% endif %}
           <li icon="md md-perm-identity"> <a href="/logout"><i class="md md-perm-identity"></i>&nbsp;<span>logout</span></a></li>
-     
         </ul>
        
       </aside>
@@ -127,6 +129,8 @@
     
     <script charset="utf-8" src="{% static ''%}assets/js/vendors.min.js"></script>
     <script charset="utf-8" src="{% static ''%}assets/js/app.min.js"></script>
+    <script charset="utf-8" src="{% static ''%}jquery-3.4.1.min.js"></script>
+    <script charset="utf-8" src="{% static ''%}chart.min.js"></script>
     {% block script %}{% endblock script %}
   </body>
 
