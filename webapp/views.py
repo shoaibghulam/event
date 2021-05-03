@@ -1080,7 +1080,7 @@ class eventapp(View):
 
         except:
 
-            return redirect('/eventapp')
+            return redirect('/events')
 
 
 class uploadprogress(View):
@@ -1102,7 +1102,7 @@ class uploadprogress(View):
             date = request.POST['date']
             time = request.POST['time']
             weight = request.POST['weight']
-            running_point = request.POST['running_point']
+            # running_point = request.POST['running_point']
             weather = request.POST['weather']
 
             
@@ -1110,7 +1110,7 @@ class uploadprogress(View):
             eventobj = Event.objects.get(EventId = EventId) 
             user_obj = User_Signup.objects.get(user_id = user_id) 
 
-            data = event_progress(EventId = eventobj,user_id= user_obj,date=date,time=time,weight=weight,running_point=running_point,meter=weather)
+            data = event_progress(EventId = eventobj,user_id= user_obj,date=date,time=time,weight=weight,meter=weather)
 
             data.save()
 
@@ -1119,7 +1119,7 @@ class uploadprogress(View):
 
         except:
 
-            return redirect('/eventapp')
+            return redirect('/events')
 
 
 
