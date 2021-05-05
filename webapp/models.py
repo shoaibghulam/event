@@ -93,7 +93,7 @@ class event_progress(models.Model):
     progress_id = models.AutoField(primary_key=True)
     EventId = models.ForeignKey(Event , on_delete=models.SET_NULL,blank=True,null=True)
     user_id = models.ForeignKey(User_Signup , on_delete=models.SET_NULL,blank=True,null=True)
-    meter = models.IntegerField( default=0 , null=True)
+    meter = models.FloatField( default=0 , null=True)
     date = models.DateField()
     time = models.TimeField()
     weight = models.FloatField(default=0.0)

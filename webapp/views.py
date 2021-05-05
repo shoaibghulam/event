@@ -13,6 +13,8 @@ from passlib.hash import django_pbkdf2_sha256 as handler
 from webapp.models import *
 import stripe
 import json
+import hashlib
+
 
 # stripe testing key
 stripe.api_key='sk_test_SD1VLYLcME6RYimXA3xxNKXW00eXfNnzuC'
@@ -1291,3 +1293,50 @@ class userprogress(View):
 
 
 
+
+class pagopar(View):
+    def get(self , request):
+        # hash_object = hashlib.sha1(b'HelWorld')
+
+
+        # comerce tokens (I will provide that)
+        hash = hashlib.sha1()
+        tokenPrivado='776f01c35b6cf70a0bc62a15a5cb0513'
+        tokenPublico='84898c14f223ce9cee2d21eb34b327f3'
+
+        # build the token to get the payment method, 
+        # you have to cancatenate the private token with FORMA-PAGO
+        # token = tokenPrivado+'1'
+        order_id='p33'
+        price=33.3
+        token = tokenPrivado+order_id+str(price)
+        # print("the token is now ",token)
+# echo sha1($data.$orderID.$j);
+        #concatenate this to make a sha1
+        hash.update(str(token).encode('utf-8'))
+        print("the hash is ",hash.hexdigest())
+# /        sha1 ($ data [ ' private_token_trade ' ]. $ orderID. strval (floatval ($ j [ 'total_amount' ])));
+
+
+        # for the example, payment methods are listed
+        url = 'https://api.pagopar.com/api/comercios/1.1/iniciar-transaccion'
+        # url = f'https: //www.pagopar.com/pagos/{hash.hexdigest()}?forma_pago=1'
+        # return redirect(url)
+        # url = ' https://api.pagopar.com/api/comercios/1.1/iniciar-transaccion/'
+
+        # data you send to pagopar
+        data ={
+            "token": hash.hexdigest(),
+            # "token_publico": tokenPublico
+        }
+
+        # set header jason tipe
+        headers = {'Content-type': 'application/json', 'Accept': 'text/plain'}
+
+        # make petition
+        req = requests.post(url, data=json.dumps(data), headers=headers)
+
+        # print data
+        print("the result of json is ",req.json())
+
+        return HttpResponse("doe")
