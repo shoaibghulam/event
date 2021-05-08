@@ -20,6 +20,7 @@
   <!-- Vendor CSS Files -->
   <link href="{% static '' %}landing/vendor/aos/aos.css" rel="stylesheet">
   <link href="{% static '' %}landing/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+  <link href="{% static '' %}parsley.min.js" rel="stylesheet">
   <link href="{% static '' %}landing/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
   <link href="{% static '' %}landing/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
   <link href="{% static '' %}landing/vendor/swiper/swiper-bundle.min.css" rel="stylesheet">
@@ -130,10 +131,13 @@
   <!-- Vendor JS Files -->
   <script src="{% static '' %}landing/vendor/aos/aos.js"></script>
   <script src="{% static '' %}landing/vendor/bootstrap/js/bootstrap.bundle.min.js"></script>
-  <script src="{% static '' %}landing/vendor/php-email-form/validate.js"></script>
+  {% comment %} <script src="{% static '' %}landing/vendor/php-email-form/validate.js"></script> {% endcomment %}
   <script src="{% static '' %}landing/vendor/swiper/swiper-bundle.min.js"></script>
 
+
   <!-- Template Main JS File -->
+    <script src="{% static '' %}jquery-3.4.1.min.js"></script>
+  <script src="{% static '' %}parsley.min.js"></script>
   <script src="{% static '' %}landing/js/main.js"></script>
   {% block script %}{% endblock script %}
 

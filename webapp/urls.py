@@ -4,7 +4,7 @@ from webapp.views import *
 urlpatterns = [
 
     path('',index.as_view(),name="index"),
-    path('superadmin',superadmin.as_view(),name="superadmin"),
+    path('superadmin/',superadmin.as_view(),name="superadmin"),
     path('superadminuser',superadminuser.as_view(),name="superadminuser"),
     path('superadminevent',superadminevent.as_view(),name="superadminevent"),
     path('superadminaddevent',superadminaddevent.as_view(),name="superadminaddevent"),

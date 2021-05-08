@@ -38,11 +38,11 @@
     </section>
 
     <section class="section">
-        <div id="eventos" class="blog-home2" "py-5">
+        <div id="eventos" class="blog-home2" >
             <div class="container">
             <div class="col-md-12">
  
-                <form action="/Signup" class="sign-up-form" method="POST">
+                <form action="/signup" class="sign-up-form" method="POST">
                     {% csrf_token %}
                   
                    <div class="row">
@@ -84,7 +84,7 @@
                     <div class="col-md-6">
                     <div class="form-group">
                       <label for="">Password</label>
-                      <input type="number" min="0" max="999" class="form-control" placeholder="Password" name="Password" required />
+                      <input type="number" min="0" max="9999" class="form-control" placeholder="Password" name="Password" required />
                     </div>
                     </div>
                     <div class="col-md-6">
