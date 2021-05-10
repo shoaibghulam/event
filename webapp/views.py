@@ -178,11 +178,12 @@ class superadminaddevent(View):
             Status = request.POST['Status']
             Description = request.POST['Description']
             EventTypeId = request.POST['EventTypeId']
+            BuyLink = request.POST['buy_link']
             
             Super_AdminAccount_id = request.session['adminid']
 
 
-            data = Event(EventName=EventName,Cost=Cost,Registration_start=Registration_start,Registration_end=Registration_end,Event_logo=Event_logo,Status=Status,Description=Description,EventTypeId = Event_Type.objects.get(EventTypeId=EventTypeId))
+            data = Event(EventName=EventName,Cost=Cost,Registration_start=Registration_start,Registration_end=Registration_end,Event_logo=Event_logo,Status=Status,Description=Description,EventTypeId = Event_Type.objects.get(EventTypeId=EventTypeId),buy_link=BuyLink)
 
             data.save()
 
@@ -387,6 +388,7 @@ class eventview(View):
                 order_data=Transactions(user_id= userid,event_id=eventid,order_id=charge['id'],totalAmount=price)
                 order_data.save()
                 messages.success(request,'Event has been register successfully')
+                request.session['event_status']=True
                 return redirect('/myevent')
 
         except stripe.error.CardError as e:
@@ -561,7 +563,7 @@ class superadmineditevent(APIView):
 
     def post(self,request,id):
 
-        try:
+        # try:
 
             EventName = request.POST['EventName']
             Cost = request.POST['Cost']
@@ -570,9 +572,9 @@ class superadmineditevent(APIView):
             Event_logo = request.FILES.get('Event_logo',False)
             Status = request.POST['Status']
             Description = request.POST['Description']
-            EventTypeId = request.POST['EventTypeId']
+            EventTypeId = request.POST.get('EventTypeId')
+            BuyLink = request.POST['buy_link']
 
-            EventTypeId = Event_Type.objects.get(EventTypeId=EventTypeId)
 
             data = Event.objects.get(EventId = id)
 
@@ -583,7 +585,10 @@ class superadmineditevent(APIView):
             
             data.Status = Status
             data.Description = Description
-            data.EventTypeId = EventTypeId
+            if EventTypeId:
+                EventTypeId = Event_Type.objects.get(EventTypeId=EventTypeId)
+                data.EventTypeId = EventTypeId
+            data.buy_link = BuyLink
 
             if Event_logo:
                 data.Event_logo = Event_logo
@@ -594,8 +599,8 @@ class superadmineditevent(APIView):
             messages.success(request,"Edit Successfully")
             return redirect("/superadminevent")
 
-        except:
-            return redirect("/superadmin")
+        # except:
+        #     return redirect("/superadmin")
 
 
 
@@ -1117,7 +1122,7 @@ class uploadprogress(View):
             data.save()
 
             messages.success(request,"Progress Upload Successfully")
-            return redirect('/uploadprogress')
+            return redirect('/Progress')
 
         except:
 
@@ -1133,23 +1138,26 @@ class Progress(APIView):
         if not request.session.has_key('user_id'):
             return redirect("/clientlogin")
 
+        try:
+            data = event_progress.objects.filter(user_id = request.session['user_id'],EventId=request.session['eventid']).order_by('-pk')[0]
+            userdata=User_Signup.objects.get(pk=request.session['user_id'])
+            year = datetime.date.today().year
+            age= year- userdata.Birth_date.year
+            #calories burned = distance run (kilometres) x weight of runner (kilograms) x 1.036
+            kcal=(data.meter/1000) * data.weight *1.036
+            print("mune year",kcal)
 
-        data = event_progress.objects.filter(user_id = request.session['user_id'],EventId=request.session['eventid']).order_by('-pk')[0]
-        userdata=User_Signup.objects.get(pk=request.session['user_id'])
-        year = datetime.date.today().year
-        age= year- userdata.Birth_date.year
-        #calories burned = distance run (kilometres) x weight of runner (kilograms) x 1.036
-        kcal=(data.meter/1000) * data.weight *1.036
-        print("mune year",kcal)
 
 
+            data={
+                'kcal':kcal
+            }
+            # return HttpResponse("weatherlist")
 
-        data={
-            'kcal':kcal
-        }
-        # return HttpResponse("weatherlist")
-
-        return render(request,"userapp/progress.html",data)
+            return render(request,"userapp/progress.html",data)
+        except:
+            messages.success(request,'Please Upload Progress')
+            return redirect('uploadprogress')
 
 
 

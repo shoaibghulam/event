@@ -1,7 +1,16 @@
 from django.db import models
 from rest_framework import serializers
 # Create your models here.
+STATUS=(
+    ('Active','Active'),
+    ('Disable','Disable'),
+)
 
+PAYMENT=(
+    ('Pending','Pending'),
+    ('Paid','Paid'),
+    ('Unpaid','Unpaid'),
+)
 class Super_AdminAccount(models.Model):
 
     SId = models.AutoField(primary_key=True)
@@ -37,6 +46,7 @@ class Event(models.Model):
     EventTypeId = models.ForeignKey(Event_Type , on_delete=models.SET_NULL,blank=True,null=True)
     Description = models.TextField(default="")
     created = models.DateTimeField(auto_now_add=True, blank=True)
+    buy_link=models.TextField(default="")
 
     
     def __str__(self):
@@ -68,8 +78,8 @@ class User_Event_Registration(models.Model):
     user_id = models.ForeignKey(User_Signup , on_delete=models.SET_NULL,blank=True,null=True)
     EventId = models.ForeignKey(Event , on_delete=models.SET_NULL,blank=True,null=True)
     Description = models.CharField(max_length=255, default="")
-    
     created = models.DateTimeField(auto_now_add=True, blank=True)
+    status =models.CharField(max_length=100, choices=STATUS , default="Disable")
 
    
 
@@ -81,6 +91,7 @@ class Transactions(models.Model):
     order_id = models.CharField(max_length=255, default="")
     createdDate = models.DateTimeField(auto_now_add=True, blank=True)
     totalAmount = models.FloatField(default=0.0)
+    status =models.CharField(max_length=100, choices=PAYMENT , default="Pending")
     
   
   
