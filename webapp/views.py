@@ -47,7 +47,10 @@ class superadminlogin(APIView):
         else:
 
             try:
-        
+                webdata = setting.objects.all()[0]
+                request.session['title']=webdata.website_title
+                request.session['desc']=webdata.website_description
+                request.session['logo']=str(webdata.website_logo.url)
                 return render(request ,'superadmin/login.html')
 
             except:
@@ -399,6 +402,11 @@ class eventview(View):
 
 class events(APIView):
     def get(self,request):
+        del request.session['eventid']
+        webdata = setting.objects.all()[0]
+        request.session['title']=webdata.website_title
+        request.session['desc']=webdata.website_description
+        request.session['logo']=str(webdata.website_logo.url)
         if not request.session.has_key('user_id'):
             return redirect("/clientlogin")
         alreadyid=list()
@@ -706,11 +714,15 @@ class superadminsetting(View):
 
 class clientlogin(View):
     def get(self,request):
+        webdata = setting.objects.all()[0]
+        request.session['title']=webdata.website_title
+        request.session['desc']=webdata.website_description
+        request.session['logo']=str(webdata.website_logo.url)
         return render(request,'public/clientlogin.html')
 
     def post(self, request):
         try:
-        
+            
             Surname = request.POST['Surname']
             Password = request.POST['Password']
             fetchobj = User_Signup.objects.filter(Ci = Surname )
@@ -1074,7 +1086,10 @@ class myevent(View):
 
 class eventapp(View):
     def get(self,request,id):
-
+        webdata = setting.objects.all()[0]
+        request.session['title']=webdata.website_title
+        request.session['desc']=webdata.website_description
+        request.session['logo']=str(webdata.website_logo.url)
         if not request.session.has_key('user_id'):
             return redirect("/clientlogin")
 
