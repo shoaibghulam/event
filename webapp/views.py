@@ -402,7 +402,8 @@ class eventview(View):
 
 class events(APIView):
     def get(self,request):
-        del request.session['eventid']
+        if request.session.has_key('eventid'):
+             del request.session['eventid']
         webdata = setting.objects.all()[0]
         request.session['title']=webdata.website_title
         request.session['desc']=webdata.website_description
