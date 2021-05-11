@@ -415,7 +415,7 @@ class events(APIView):
         for x in listed:
             alreadyid.append(x.EventId.EventId)
 
-        eventlist = Event.objects.filter(~Q(pk__in=alreadyid)).order_by('-EventId')[0:3]
+        eventlist = Event.objects.filter(~Q(pk__in=alreadyid)).order_by('-EventId')
         return render(request,'userapp/allevents.html',{'data':eventlist})
 
 
