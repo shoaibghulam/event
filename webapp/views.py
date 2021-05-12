@@ -362,7 +362,7 @@ class eventview(View):
             exp=exp.split('/')
             month=exp[0]
             year=exp[1]
-        
+            print("te price idfffffffffffffffffffffffffffffffffffffffffffffffffs ",price)
             cvc=request.POST['cvv']
             card=request.POST['number']
             createtoken = stripe.Token.create(
@@ -377,7 +377,7 @@ class eventview(View):
             # price *=100
             # print("the price is ",price)
             charge = stripe.Charge.create(
-                        amount = round(price),
+                        amount = round(price)*100,
                         currency='usd',
                         description='Apointment created',
                         source = createtoken
@@ -455,7 +455,7 @@ class signup(APIView):
         Name = request.POST['Name']
         # Surname = request.POST['Surname']
         Ci = request.POST['Ci']
-        Ruc = request.POST['Ruc']
+        Ruc = request.POST.get('Ruc','')
         Gender = request.POST['Gender']
         Phones = request.POST['Phones']
         Email = request.POST['Email']
