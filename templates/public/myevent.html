@@ -57,8 +57,8 @@
             <div class="row">
                 {% for d in data %}
                 <div class="col-lg-4 col-md-6 col-sm-12">
-                    <div class="product-box mt40">
-                        <img class="img-fluid" src="{{d.EventId.Event_logo.url}}" style="width:100%"/>
+                    <div class="product-box mt40 mt-4 mb-4">
+                        <img class="img-fluid" src="{{d.EventId.Event_logo.url}}" style="width:100%; height: 226px;"/>
                         <a class="btn btn-primary btn-block" href="/eventapp/{{d.EventId.EventId}}">{{d.EventId.EventName}}</a>
                     </div>
                 </div>
