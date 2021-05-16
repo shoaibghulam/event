@@ -46,7 +46,7 @@ class Event(models.Model):
     EventTypeId = models.ForeignKey(Event_Type , on_delete=models.SET_NULL,blank=True,null=True)
     Description = models.TextField(default="")
     created = models.DateTimeField(auto_now_add=True, blank=True)
-    buy_link=models.TextField(default="")
+    distance=models.FloatField(default="")
 
     
     def __str__(self):
@@ -67,6 +67,7 @@ class User_Signup(models.Model):
     Birth_date  = models.DateField()
     Creation = models.DateTimeField(auto_now_add=True, blank=True)
     Password = models.TextField(max_length=500 , default="")
+    Token = models.CharField(max_length=40, default="")
 
 
     def __str__(self):

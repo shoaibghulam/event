@@ -164,6 +164,8 @@ path('leaderboard', leaderboard.as_view(),name="leaderboard"),
 path('leaderboarddata', leaderboarddata.as_view(),name="leaderboarddata"),
 path('userprogress', userprogress.as_view(),name="userprogress"),
 path('pagopar', pagopar.as_view(),name="pagopar"),
+path('forgotpassword', forgotpassword.as_view(),name="forgotpassword"),
+path('forget/<str:username>/<str:token>',forget.as_view(),name="forget"),
 
 
 

@@ -5,6 +5,8 @@ from django.contrib import messages
 from rest_framework.views import APIView
 from rest_framework.response import Response
 from django.db.models import Q
+
+from django.core.mail import EmailMultiAlternatives
 from django.core.exceptions import ValidationError
 from django.core.validators import validate_email
 import datetime 
@@ -14,11 +16,29 @@ from webapp.models import *
 import stripe
 import json
 import hashlib
-
+from django.db.models import Sum
+import random 
+from django.http import JsonResponse
+BASE="http://127.0.0.1:8000/"
 
 # stripe testing key
 stripe.api_key='sk_test_SD1VLYLcME6RYimXA3xxNKXW00eXfNnzuC'
 
+def emailverify(subject,to,link,message):
+
+    from_email="komaljan4@gmail.com"
+        
+        
+    html_content = f'''
+                <h1 style="text-align:center; font-family: 'Montserrat', sans-serif;">{message}</h1>
+                    
+                <div style='width:300px; margin:0 auto;'> <a href='{link}' style=" background-color:#0066ff; border: none;  color: white; padding: 15px 32px;  text-align: center; text-decoration: none; display: inline-block; font-size: 16px; margin: 4px 2px; cursor: pointer; font-family: PT Sans, sans-serif;" >click here to verify</a>
+            </div>
+                '''
+
+    msg = EmailMultiAlternatives(subject, html_content, from_email, [to])
+    msg.attach_alternative(html_content, "text/html")
+    msg.send()
 
 class index(View):
     def get(self,request):
@@ -186,7 +206,7 @@ class superadminaddevent(View):
             Super_AdminAccount_id = request.session['adminid']
 
 
-            data = Event(EventName=EventName,Cost=Cost,Registration_start=Registration_start,Registration_end=Registration_end,Event_logo=Event_logo,Status=Status,Description=Description,EventTypeId = Event_Type.objects.get(EventTypeId=EventTypeId),buy_link=BuyLink)
+            data = Event(EventName=EventName,Cost=Cost,Registration_start=Registration_start,Registration_end=Registration_end,Event_logo=Event_logo,Status=Status,Description=Description,EventTypeId = Event_Type.objects.get(EventTypeId=EventTypeId),distance=BuyLink)
 
             data.save()
 
@@ -597,7 +617,7 @@ class superadmineditevent(APIView):
             if EventTypeId:
                 EventTypeId = Event_Type.objects.get(EventTypeId=EventTypeId)
                 data.EventTypeId = EventTypeId
-            data.buy_link = BuyLink
+            data.distance = BuyLink
 
             if Event_logo:
                 data.Event_logo = Event_logo
@@ -1098,6 +1118,7 @@ class eventapp(View):
 
             data = Event.objects.get(EventId = id)
             request.session['eventid'] = id
+            request.session['distance'] = data.distance
             print(request.session['eventid'])
             return render(request,'userapp/index.html',{'data':data}) 
 
@@ -1282,15 +1303,21 @@ class leaderboarddata(View):
             return redirect("/clientlogin")
         alldata=list()
         # data= event_progress.objects.order_by().values('user_id__Name','meter','weight').distinct()
-        data= event_progress.objects.filter(EventId=request.session['eventid']).order_by('-pk')
+        # data= event_progress.objects.filter(EventId=request.session['eventid']).order_by('-pk')
+        # data=event_progress.objects.filter(EventId=request.session['eventid']).aggregate(Sum('meter'))
+        data=event_progress.objects.filter(EventId=request.session['eventid']).values('user_id','user_id__Name','EventId__distance').annotate(meter=Sum('meter')).order_by('-user_id')
+        for x in data:
+            # print(x)
+            alldata.append(x)
+        print("mune data haydda a",alldata)
         # for x in data:
         #     if not x.user_id.user_id in alldata:
         #         alldata.append(x)
         # print(alldata)
         # print("the data is ",alldata)
-        serdata= serProgress(data, many=True)
+        # serdata= serProgress(data, many=True)
         # x=f"[{data}]"
-        return HttpResponse(json.dumps(serdata.data))
+        return HttpResponse(json.dumps(alldata))
 
 
 
@@ -1301,9 +1328,17 @@ class leaderboarddata(View):
 
 class userprogress(View):
     def get(self, request):
-       data = event_progress.objects.filter(user_id = request.session['user_id'],EventId=request.session['eventid']).order_by('-pk')
-       serdata=serProgress(data, many=True)
-       return HttpResponse(json.dumps(serdata.data))
+        totlrun=event_progress.objects.filter(user_id=request.session['user_id']).aggregate(Sum('meter'))
+        data = event_progress.objects.filter(user_id = request.session['user_id'],EventId=request.session['eventid']).order_by('-pk')
+        serdata=serProgress(data, many=True)
+        print(request.session['distance'])
+        alldata ={
+            'data':serdata.data, 
+            'totalrun':totlrun,
+            'eventdistance': request.session['distance'],
+        }
+        print("the sum is here ====>?",alldata)
+        return HttpResponse(json.dumps(alldata))
 
 
 
@@ -1364,3 +1399,58 @@ class pagopar(View):
         print("the result of json is ",req.json())
 
         return HttpResponse("doe")
+
+class forgotpassword(View):
+    def get(self,request):
+        return render(request,'userapp/forgot.html')
+
+    def post(self,request):
+        tk=  rand_token =random.randint(1,5000)
+        ci=request.POST['ci']
+        try:
+            data=User_Signup.objects.get(Ci=ci)
+            if data:
+                data.Token=tk
+                link=f"{BASE}forget/{ci}/{tk}"
+                msg="Rest Password"
+                emailverify("Forget password",data.Email,link,msg)
+                data.save()
+                messages.success(request,"A Reset link has been sent")
+             
+                return redirect('/clientlogin')
+        except:
+                messages.success(request,"Please Enter Correct Ci")
+                return redirect('/forgotpassword')
+
+
+class forget(View):
+    def get(self, request,username,token):
+        try:
+            data=User_Signup.objects.get(Ci=username,Token=token)
+            if data:
+                return render(request,'userapp/reset.html',{'data':data})
+        except:
+             messages.success(request,'Token has been expire')
+             return redirect('/clientlogin')
+        
+
+    def post(self, request,username,token):
+       
+        password= handler.hash(request.POST['password'])
+
+      
+        data=User_Signup.objects.get(Ci=username,Token=token)
+        tk= random.randint(1,5000)
+        if data:
+            data.Password=password
+            data.Token=tk
+            data.save()
+            messages.success(request,"Password has been Changed")
+            return redirect("/clientlogin")
+    
+
+
+
+
+
+
