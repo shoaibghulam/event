@@ -77,7 +77,7 @@ class User_Signup(models.Model):
 class User_Event_Registration(models.Model):
     Registration_id = models.AutoField(primary_key=True)
     user_id = models.ForeignKey(User_Signup , on_delete=models.SET_NULL,blank=True,null=True)
-    EventId = models.ForeignKey(Event , on_delete=models.SET_NULL,blank=True,null=True)
+    EventId = models.ForeignKey(Event , on_delete=models.CASCADE ,blank=True,)
     Description = models.CharField(max_length=255, default="")
     created = models.DateTimeField(auto_now_add=True, blank=True)
     status =models.CharField(max_length=100, choices=STATUS , default="Disable")
