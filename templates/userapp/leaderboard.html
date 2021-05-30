@@ -2,32 +2,32 @@
 {% load static %}
 {% block body %}
 <style>
-  .dataTable-sorter{ text-align: center;}
+.dataset{
+  font-size:13px;
+}
+.dataset span{
+  font-size:15px;
+}
 </style>
 <div class="container-fluid">
   <h1 class="text-center">Progress </h1>
 <div style="width:80%; margin:0 auto">
   <div class="data_tables">
-    <table id="example" class=" table table-full text-center" cellspacing="0" width="100%">
-      <thead >
-        <tr >
-          <th>Name</th>
-          <th >progress</th>
-        
-        </tr>
-      </thead>
-      <tbody id="tbody">
+   <zing-grid class="dataset"  search pager page-size="3" page-size-options="2,3,6"  viewport-stop id="datatable">
+  </zing-grid>
 
-      </tbody>
-    </table>
   </div>
 </div>
    
 </div>
 {% endblock body %}
 {% block script %}
+<script src="https://cdn.zinggrid.com/zinggrid.min.js"></script>
+
+
 <script>
-var table = new DataTable("table");
+const zingGridRef = document.querySelector('#datatable');
+
   var shoaib="";
 var comp="";
 $.ajax({
@@ -38,28 +38,18 @@ $.ajax({
 
     var dataset=eval(data);
       shoaib = dataset
-      
-    // for(x=0;x<dataset.length;x++){
-    //   var  kcal=(dataset[x].meter/1000) * dataset[x].weight *1.036;
-    //   comp+=`
-    //   <tr>
-    //   <td>${dataset[x].user_id.Name}</td>
-    //   <td>${kcal}</td>
-    //   </tr>
-    //   `;
-    // }
+      var datalist=[]
+
   
      for(x=0;x<dataset.length;x++){
-      var  pre=(dataset[x].EventId__distance/100) * dataset[x].meter;
+     // var pre=(mydata.totalrun.meter__sum*100)/mydata.eventdistance;
+      var  pre=(dataset[x].meter*100) / dataset[x].EventId__distance;
      console.log(pre)
-      comp+=`
-      <tr>
-      <td>${dataset[x].user_id__Name}</td>
-      <td>${pre}%</td>
-      </tr>
-      `;
+     datalist.push({'Name':dataset[x].user_id__Name,'progress':pre.toFixed(1)})
+    
     }
-    $('#tbody').html(comp)
+ 
+    zingGridRef.setAttribute('data', JSON.stringify(datalist));
     
 
   }

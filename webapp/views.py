@@ -19,14 +19,14 @@ import hashlib
 from django.db.models import Sum
 import random 
 from django.http import JsonResponse
-BASE="http://127.0.0.1:8000/"
+BASE="https://eventticket.pythonanywhere.com/"
 
 # stripe testing key
 stripe.api_key='sk_test_SD1VLYLcME6RYimXA3xxNKXW00eXfNnzuC'
 
 def emailverify(subject,to,link,message):
 
-    from_email="komaljan4@gmail.com"
+    from_email="event@victoriadesafios.com"
         
         
     html_content = f'''
@@ -267,27 +267,27 @@ class superadminaddeventtype(APIView):
 
     def post(self,request):
 
-        # try:
+        try:
 
-        EventType = request.POST['EventType']
-        
-        Super_AdminAccount_id = request.session['adminid']
+            EventType = request.POST['EventType']
+            
+            Super_AdminAccount_id = request.session['adminid']
 
-        checkevent = Event_Type.objects.filter(EventType = EventType )
+            checkevent = Event_Type.objects.filter(EventType = EventType )
 
-        if checkevent:
+            if checkevent:
 
-            messages.error(request,"Event Already Exist")
+                messages.error(request,"Event Already Exist")
+                return redirect("/superadminaddeventtype")
+
+            data = Event_Type(EventType=EventType,Super_AdminAccount_id=Super_AdminAccount.objects.get(SId = Super_AdminAccount_id))
+            data.save()
+
+            messages.success(request,"Add Successfully")
             return redirect("/superadminaddeventtype")
 
-        data = Event_Type(EventType=EventType,Super_AdminAccount_id=Super_AdminAccount.objects.get(SId = Super_AdminAccount_id))
-        data.save()
-
-        messages.success(request,"Add Successfully")
-        return redirect("/superadminaddeventtype")
-
-        # except:
-        #     return redirect("/superadminaddeventtype")
+        except:
+            return redirect("/superadminaddeventtype")
 
     
 
@@ -1138,14 +1138,19 @@ class uploadprogress(View):
     def post(self,request):
 
         try:
-
+            
             EventId = request.session['eventid']
 
             
             user_id = request.session['user_id']
             date = request.POST['date']
-            time = request.POST['time']
+            hour = request.POST['HH']
+            mint = request.POST['MM']
+            second = request.POST['SS']
+            time =f"{hour}:{mint}:{second}"
             weight = request.POST['weight']
+            fulltime=datetime.datetime.strptime(time, '%H:%M:%S')
+            # print("the full time is===========> ",fulltime)
             # running_point = request.POST['running_point']
             weather = request.POST['weather']
 
@@ -1154,12 +1159,13 @@ class uploadprogress(View):
             eventobj = Event.objects.get(EventId = EventId) 
             user_obj = User_Signup.objects.get(user_id = user_id) 
 
-            data = event_progress(EventId = eventobj,user_id= user_obj,date=date,time=time,weight=weight,meter=weather)
+            data = event_progress(EventId = eventobj,user_id= user_obj,date=date,time=fulltime,weight=weight,meter=weather)
 
             data.save()
 
             messages.success(request,"Progress Upload Successfully")
             return redirect('/Progress')
+           
 
         except:
 

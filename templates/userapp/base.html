@@ -14,7 +14,7 @@
     <meta name="msapplication-config" content="{% static ''%}assets/img/favicon/browserconfig.xml">
     <meta name="theme-color" content="#ffffff">
     <link rel="icon" href="{{request.session.logo}}">
-
+    <link href="{% static ''%}mdtimepicker.css" rel="stylesheet" type="text/css">
 
     <link rel="manifest" href="{% static ''%}assets/img/favicon/manifest.json">
     <link rel="shortcut icon" href="{{request.session.logo}}">
@@ -63,15 +63,7 @@
               <button type="button" class="navbar-toggle pull-left m-15" data-activates=".sidebar"> <span class="sr-only">Toggle navigation</span> <span class="icon-bar"></span> <span class="icon-bar"></span> <span class="icon-bar"></span> </button>
             
             </div>
-            <ul class="nav navbar-nav navbar-right navbar-right-no-collapse">
-              <li class="dropdown pull-right">
-                <button class="dropdown-toggle pointer btn btn-round-sm btn-link withoutripple" data-template-url="{% static ''%}assets/tpl/partials/dropdown-navbar.html"> <i class="md md-more-vert f20"></i> </button>
-              </li>
-              <li class="dropdown pull-right">
-                <button class="dropdown-toggle pointer btn btn-round-sm btn-link withoutripple" data-template-url="{% static ''%}assets/tpl/partials/theme-picker.html"> <i class="md md-settings f20"></i> </button>
-              </li>
-            
-            </ul>
+        
           </div>
         </nav>
         <div class="main-content" autoscroll="true" bs-affix-target="" init-ripples="" style="">
@@ -112,13 +104,9 @@
     }
     </style>
 
-<script
-  src="https://code.jquery.com/jquery-2.2.4.min.js"
-  integrity="sha256-BbhdlvQf/xTY9gja0Dq3HiwQF8LaCRTXxZKRutelT44="
-  crossorigin="anonymous"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/d3/3.5.5/d3.min.js"></script>
-<script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.12.1/jquery-ui.min.js" integrity="sha512-uto9mlQzrs59VwILcLiRYeLKPPbS/bT71da/OEBYEwcdNUk8jYIy+D176RYoop1Da+f9mvkYrmj5MCLZWEtQuA==" crossorigin="anonymous"></script>
-   
+{% comment %} <script src="https://code.jquery.com/jquery-1.12.4.min.js"></script> {% endcomment %}
+   <script src="{% static '' %}mdtimepicker.js"></script>
     <script charset="utf-8" src="{% static ''%}assets/js/vendors.min.js"></script>
     <script charset="utf-8" src="{% static ''%}assets/js/app.min.js"></script>
     

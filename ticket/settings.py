@@ -134,8 +134,8 @@ MEDIA_ROOT = BASE_DIR / 'upload'
 MEDIA_URL = '/upload/'
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
-EMAIL_HOST = 'smtp.gmail.com'
+EMAIL_HOST = 'mail.victoriadesafios.com'
 EMAIL_USE_TLS = True
 EMAIL_PORT = 587
-EMAIL_HOST_USER = 'komaljan4@gmail.com'
-EMAIL_HOST_PASSWORD = 'komaljan4152'
+EMAIL_HOST_USER = 'event@victoriadesafios.com'
+EMAIL_HOST_PASSWORD = 'event11122@'
